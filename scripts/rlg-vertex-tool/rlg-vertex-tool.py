@@ -52,6 +52,7 @@ def read_vertex_data(vertex_attributes):
         for i in vertex_attributes:
             if( i['offset'] <= current_byte ):
                 stride = i['stride']
+                unknown_0x4 = i['0x4']
 
         new_vector = []
         for i in range(0, stride//4):
@@ -60,10 +61,12 @@ def read_vertex_data(vertex_attributes):
             new_vector.append(f)
         a.append( {
             "offset" : current_byte,
+            "type?" : unknown_0x4, # TODO: try to extract only vectors with this value as 0x67 or as 0xfe, they might be vertices (or normals)
             "values" : new_vector
         } )
     for i in range(0, len(a)):
-        print(a[i])
+        if( a[i]['offset'] < 2804 ):
+            print(a[i])
     rlg.close()
 
 def read_vertex_attribute():

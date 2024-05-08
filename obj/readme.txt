@@ -1,0 +1,2 @@
+Put your .obj files here.
+Make sure they are named the same way and have the same number of vertices as the original file (for instance, if you want to edit mario.rlg, the obj file needs to be named mario.obj)

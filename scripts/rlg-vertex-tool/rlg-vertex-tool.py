@@ -38,9 +38,9 @@ def get_vertices_from_rlg(rlg, vertex_attributes):
     #find the section
     location = data.find(b'\x00\x01\xb0\x06')
 
-    start_of_data = location+8
     rlg.seek( location+4 ,0)
     section_size = int.from_bytes( rlg.read(4), "big" )
+    start_of_data = rlg.tell()
     group = 0
     last_0x4 = 0
     unknown_0x4 = None
@@ -238,7 +238,7 @@ def generate_new_rlg(original_rlg):
     rlg.seek(0,0)
     data = rlg.read( file_size )
     # find the start of the section we need
-    start_of_data = data.find(b'\xb0\x06')+6
+    start_of_data = data.find(b'\x00\x01\xb0\x06')+8
     rlg.close()
 
     # Now it's time to copy the rlg file and replace its vertices 

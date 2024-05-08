@@ -44,6 +44,9 @@ def read_vertex_data(vertex_attributes):
     start_of_data = location+6
     rlg.seek( location+2 ,0)
     section_size = int.from_bytes( rlg.read(4), "big" )
+    group = 0
+    last_0x4 = 0
+    unknown_0x4 = None
     a = []
     while rlg.tell() < start_of_data+section_size:
         current_byte = rlg.tell() - start_of_data
@@ -52,7 +55,11 @@ def read_vertex_data(vertex_attributes):
         for i in vertex_attributes:
             if( i['offset'] <= current_byte ):
                 stride = i['stride']
-                unknown_0x4 = i['0x4']
+                unknown_0x4 = i['0x4']                
+
+        if(last_0x4 == '0xb0' and unknown_0x4 == '0x67'):
+            group += 1
+        last_0x4 = unknown_0x4
 
         new_vector = []
         for i in range(0, stride//4):
@@ -61,13 +68,20 @@ def read_vertex_data(vertex_attributes):
             new_vector.append(f)
         a.append( {
             "offset" : current_byte,
-            "type?" : unknown_0x4, # TODO: try to extract only vectors with this value as 0x67 or as 0xfe, they might be vertices (or normals)
+            "type" : unknown_0x4, # TODO: try to extract only vectors with this value as 0x67 or as 0xfe, they might be vertices (or normals)
+            "group" : group,
             "values" : new_vector
         } )
-    for i in range(0, len(a)):
-        if( a[i]['offset'] < 2804 ):
-            print(a[i])
+    
+    # fliter only the vertices we need
+    vertices = []
+
+    for i in a:
+        if( i['type'] == '0x67' ):
+            vertices.append( i )
     rlg.close()
+    return vertices
+
 
 def read_vertex_attribute():
     # TODO: detect file name automatically
@@ -153,6 +167,79 @@ def read_mesh_data():
     rlg.close()
 
 
+def create_obj(vertices):
+    obj = open("output/file.obj", "w")
+    for v in vertices:
+        line = "v " + str( v["values"][0] ) + " " + str( v["values"][1] ) + " " + str( v["values"][2] ) + "\n"
+        obj.write(line)
+    obj.close()
+
+
+def read_obj():
+    obj = open("obj/file.obj", "r")
+    # find the file size
+    obj.seek(0,2)
+    file_size = obj.tell()
+    # read the data
+    obj.seek(0,0)
+    data = obj.read( file_size )
+    # read the vertices of the obj file and convert them to array
+    a = []
+    vertex = []
+    num_str = ''
+    for i in data:
+        if(i in ['0','1','2','3','4','5','6','7','8','9','-','.','e']):
+            num_str += i
+        if( (i == " " and len(num_str) != 0) or i == "\n"):
+            num = float(num_str)
+            vertex.append(num)
+            num_str = ''
+            if(i == "\n"):
+                a.append(vertex)
+                vertex = []
+
+    obj.close()
+    return a
+
+
+def edit_rlg():
+    new_vertices = read_obj()
+    old_vertices = read_vertex_data(read_vertex_attribute())
+    print(len(new_vertices))
+    print(len(old_vertices))
+
+    rlg = open("rlg/mario.rlg", "rb")
+    # find the file size
+    rlg.seek(0,2)
+    file_size = rlg.tell()
+    # read the data
+    rlg.seek(0,0)
+    data = rlg.read( file_size )
+    # find the start of the section we need
+    start_of_data = data.find(b'\xb0\x06')+6
+    rlg.close()
+
+    # Now it's time to write on the file
+    rlg = open("rlg/mario.rlg", "r+b")
+    vertex_num = 0
+
+    for i in old_vertices:
+        offset = i['offset']
+        curr_location = start_of_data+offset
+        rlg.seek(curr_location,0)
+        for j in new_vertices[ vertex_num ]:
+            j_hexstr = hex(struct.unpack('<I', struct.pack('<f', j))[0])
+            print( j_hexstr )
+            if(j_hexstr != "0x0"):
+                j_bytes = bytes.fromhex(j_hexstr[2:])
+            else:
+                j_bytes = b'\x00\x00\x00\x00'
+            rlg.write( j_bytes )
+        vertex_num += 1
+
+
+
+
 def byte_hex_str(bytes):
     string = ""
     for i in bytes:
@@ -163,6 +250,14 @@ def byte_hex_str(bytes):
     return string
 
 
+while True:
+    r = input("What do you want to do?\n\n1)rlg -> obj\n2)obj -> rlg\n")
 
-vertex_attributes = read_vertex_attribute()
-read_vertex_data(vertex_attributes)
+    if(r == "1"):
+        vertex_attributes = read_vertex_attribute()
+        vertices = read_vertex_data(vertex_attributes)
+        create_obj(vertices)
+    elif(r == "2"):
+        edit_rlg()
+    else:
+        print("invalid input")

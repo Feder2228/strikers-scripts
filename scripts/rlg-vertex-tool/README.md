@@ -1,5 +1,5 @@
 # RLG Vertex Tool
-RLG Vertex Tool allows you to extract data from rlg files and do some very basic mods.
+RLG Vertex Tool allows you to extract data from rlg files and do some very basic mods.  
 You extract all the vertices of a .rlg into an .obj, but no faces, edges or anything else.
 
 ## How to make your 3d model mod with this tool:

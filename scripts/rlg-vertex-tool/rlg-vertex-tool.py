@@ -53,8 +53,7 @@ def get_vertices_from_rlg(rlg, vertex_attributes):
             if( i['offset'] <= current_byte ):
                 stride = i['stride']
                 unknown_0x4 = i['0x4']                
-
-        if(last_0x4 == '0xb0' and unknown_0x4 == '0x67'):
+        if(last_0x4 == 0xb0 and unknown_0x4 == 0x67):
             group += 1
         last_0x4 = unknown_0x4
 
@@ -74,7 +73,7 @@ def get_vertices_from_rlg(rlg, vertex_attributes):
     vertices = []
 
     for i in a:
-        if( i['type'] == '0x67' ):
+        if( i['type'] == 0x67 ):
             vertices.append( i )
     return vertices
 
@@ -209,7 +208,6 @@ def read_index_data_group_by_mesh(rlg):
     mesh_data = read_mesh_data(rlg, True)
     index_data = read_index_data(rlg)
     vertex_attribute = read_vertex_attribute(rlg)
-    vertices = get_vertices_from_rlg(rlg, vertex_attribute)
     # Create text file
     txt = open("output/_miscdata.txt", "w")
     # Loop 
@@ -227,8 +225,9 @@ def read_index_data_group_by_mesh(rlg):
         # Vertices of mesh
         txt.write("----------------------------------------------------------------\n")
         txt.write("VERTICES: \n")
+        vertices = get_vertices_from_rlg(rlg, mesh_vertex_attributes)
         for i in vertices:
-            txt.write( str(i) + "\n")
+            txt.write( "Offset: " +hex(i["offset"])+ " Coordinates: " +str(i["values"])+ "\n")
         # Index data
         txt.write("----------------------------------------------------------------\n")
         txt.write("INDEX DATA: \n")

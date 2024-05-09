@@ -227,7 +227,9 @@ def read_index_data_group_by_mesh(rlg):
         txt.write("VERTICES: \n")
         vertices = get_vertices_from_rlg(rlg, mesh_vertex_attributes)
         for i in vertices:
-            txt.write( "Offset: " +hex(i["offset"])+ " Coordinates: " +str(i["values"])+ "\n")
+            # Number of the vertex inside the mesh
+            vertex_number = hex( i["offset"]//12 - mesh_vertex_attributes[0]["offset"] )
+            txt.write( "Offset: " +hex(i["offset"])+ " (Num: " +vertex_number+ ") Coordinates: " +str(i["values"])+ "\n")
         # Index data
         txt.write("----------------------------------------------------------------\n")
         txt.write("INDEX DATA: \n")

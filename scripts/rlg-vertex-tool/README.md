@@ -1,4 +1,4 @@
-Support for this tool on this page is discontinued. To find the latest version checkout (https://github.com/Feder2228/rlg-vertex-tool)[https://github.com/Feder2228/rlg-vertex-tool] instead.
+Support for this tool on this page is discontinued. To find the latest version checkout [https://github.com/Feder2228/rlg-vertex-tool] instead.
 # RLG Vertex Tool
 RLG Vertex Tool allows you to read data and extract vertices from rlg files. It also allows you to edit the files and make some very basic mods.  
 You can extract all the vertices of a .rlg into an .obj, but no faces, edges or anything else.
